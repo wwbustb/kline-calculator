@@ -131,60 +131,88 @@ x为所求的alpha因子,r为收益率序列.返回一个数字。
 
 1. 简易计算器功能:
 `3\**0.5+2.0/3*(3+4)+pi`
+
 2. 画K线： 
 `PLOT(MA888,candlestick,0),PLOT(MA888.volume,column,1)`
+
 3. 计算收益率序列：
 `100*delta(MA888.close,1)/delay(MA888.close,1)`
+
 4. 3中的收益率由于主力合约切换，收益率序列产生异常值，可以使用三目运算去异常值：
 `100*abs(delta(MA888.close,1)/delay(MA888.close,1))>5?0:100*delta(MA888.close,1)/MA888.close`
+
 5. 在K线上叠加均线：
 `PLOT(MA888,candlestick,0),PLOT(mean(MA888.close,10),0)`
+
 6. 使用TA-Lib库的函数：
 `PLOT(MA888.close,0),PLOT(MACD(MA888,10),1)`
+
 7. 合约跨期套利，画出合约差价：
 `MA809.close-MA805.close`
+
 8. 合约跨期套利，求出平均差价：
 `mean(MA809.close-MA805.close)`
+
 9. 合约跨期套利，最大差价：
 `max(MA809.close-MA805.close)`
+
 10. 合约跨期套利，求出差价标准差：
 `std(MA809.close-MA805.close)`
+
 11. 合约跨期套利，差价大于20的次数：
 `count(MA805.close-MA809.close>20)`
+
 12. 跨品种套利，画出两品种相关系数变化：
 `corr(j888.close,jm888.close,15)`
+
 13. 跨品种套利，画出两品种线性回归系数的变化：
 `regbeta(j888.close,jm888.close,15)`
+
 14. 简单改一下可以套用一些alpha公式
 参考：[聚宽](https://www.joinquant.com/data/dict/alpha191#alpha181)
 注意链接里的文章错误较多，可参考原始研报[国泰君安-数量化专题之九十三：基于短周期价量特征的多因子选股体系](http://vdisk.weibo.com/s/uEfe2futCdyJ9)
+
 如alpha_001，原始公式为：
+
 `(-1 * CORR(RANK(DELTA(LOG(VOLUME),1)),RANK(((CLOSE-OPEN)/OPEN)),6))`
+
 改为：
+
 `-1 * corr(rank(delta(log(MA888.volume),1)),rank(((MA888.close-MA888.open)/MA888.open)),6)`
+
 如alpha_002, 原始公式为：
+
 `-1 * delta(((close-low)-(high-close))/((high-low)),1)`
+
 改为：
+
 `-1 * delta(((MA888.close-MA888.low)-(MA888.high-MA888.close))/((MA888.high-MA888.low)),1)`
+
 如alpha_003,原始公式为：
+
 `SUM((CLOSE=DELAY(CLOSE,1)?0:CLOSE-(CLOSE>DELAY(CLOSE,1)?MIN(LOW,DELAY(CLOSE,1)):MAX(HIGH,DELAY(CLOSE,1)))),6)`
+
 公式的嵌套比较多，为了方便清晰可以改为：
 
-        CLOSE=MA888.close,LOW=MA888.low,HIGH=MA888.high
-        temp1=(CLOSE-(((CLOSE>delay(CLOSE,1)))?min(LOW,delay(CLOSE,1)):max(HIGH,delay(CLOSE,1))))
-        temp2=(CLOSE==delay(CLOSE,1))?0:temp1
-        sum(temp2,6)
-    如alpha_005，原始公式为:
-    `(-1*TSMAX(CORR(TSRANK(VOLUME,5),TSRANK(HIGH,5),5),3))`
-    改为：
-    
-        VOLUME = MA888.volume,HIGH=MA888.high  
-        (-1*tsmax(corr(tsmax(VOLUME,5),tsrank(HIGH,5),5),3))
-15. alpha一般的研究框架：
-判断一个alpha是否有效的方法是求其和收益率序列的相关系数,如：
+    CLOSE=MA888.close,LOW=MA888.low,HIGH=MA888.high
+    temp1=(CLOSE-(((CLOSE>delay(CLOSE,1)))?min(LOW,delay(CLOSE,1)):max(HIGH,delay(CLOSE,1))))
+    temp2=(CLOSE==delay(CLOSE,1))?0:temp1
+    sum(temp2,6)
 
-        CLOSE = MA888.close,VOLUME=MA888.volume,HIGH=MA888.high,LOW=MA888.low,OPEN=MA888.open  
-        RET=delta(CLOSE,1)/delay(CLOSE,1)  
-        alpha=sma(CLOSE-delay(CLOSE,5),5,1)  
-        IC(alpha,delay(RET,-1))
-    返回的结果绝对值越大说明alpha因子与收益率相关系数越强，预测性越好。
+如alpha_005，原始公式为:
+
+`(-1*TSMAX(CORR(TSRANK(VOLUME,5),TSRANK(HIGH,5),5),3))`
+
+改为：
+
+    VOLUME = MA888.volume,HIGH=MA888.high  
+    (-1*tsmax(corr(tsmax(VOLUME,5),tsrank(HIGH,5),5),3))
+
+alpha一般的研究框架：判断一个alpha是否有效的方法是求其和收益率序列的相关系数,如：
+
+    CLOSE = MA888.close,VOLUME=MA888.volume,HIGH=MA888.high,LOW=MA888.low,OPEN=MA888.open  
+    RET=delta(CLOSE,1)/delay(CLOSE,1)  
+    alpha=sma(CLOSE-delay(CLOSE,5),5,1)  
+    IC(alpha,delay(RET,-1))
+        
+返回的结果绝对值越大说明alpha因子与收益率相关系数越强，预测性越好。
