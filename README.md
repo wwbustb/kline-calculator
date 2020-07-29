@@ -1,7 +1,7 @@
 # 表达式说明
 
 本表达式用于快速对时间序列进行运算，让不会编程语言的新手也能通过写出公式，验证想法。地址为 https://www.quantinfo.com/Tools/View/3/formula.html
-欢迎到www.fmz.com进行量化交易。
+欢迎到 www.fmz.com 进行量化交易。
 
 ## 支持数据
 
